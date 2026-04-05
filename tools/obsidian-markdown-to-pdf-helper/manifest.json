@@ -1,0 +1,9 @@
+{
+	"id": "obsidian-markdown-to-pdf-helper",
+	"name": "Markdown to PDF",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Export the active markdown file to PDF using obsidian-markdown-to-pdf",
+	"author": "Benjamin Kobjolke",
+	"isDesktopOnly": true
+}

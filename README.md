@@ -1,6 +1,6 @@
 # Obsidian Markdown to PDF
 
-Convert Obsidian-flavored markdown files to PDF with support for wiki-link images, frontmatter stripping, and page breaks.
+Convert Obsidian-flavored markdown files to PDF with support for wiki-link images, frontmatter stripping, and page breaks. Includes an Obsidian plugin for one-click export from the command palette.
 
 ## Features
 
@@ -35,18 +35,49 @@ install.bat
 
 ## Usage
 
+### Command line
+
 ```
 start.bat --input "path/to/note.md"
 start.bat --input "path/to/note.md" --output "output.pdf"
 ```
 
-### Output path rules
+#### Output path rules
 
 | Argument | Behavior |
 |---|---|
 | No `--output` | PDF saved next to the markdown file with `.pdf` extension |
 | `--output filename.pdf` | PDF saved in the same directory as the markdown file |
 | `--output path/to/file.pdf` | PDF saved at the specified path |
+
+### Obsidian plugin
+
+An Obsidian plugin is included at `tools/obsidian-markdown-to-pdf-helper/` for exporting directly from within Obsidian.
+
+#### Plugin installation
+
+1. Build the plugin:
+   ```
+   cd tools\obsidian-markdown-to-pdf-helper
+   npm install
+   npm run build
+   ```
+2. Copy the `obsidian-markdown-to-pdf-helper` folder into your vault's `.obsidian/plugins/` directory
+3. In Obsidian, go to **Settings > Community plugins** and enable **Markdown to PDF**
+
+#### Plugin settings
+
+| Setting | Description |
+|---|---|
+| **Python tool path** | Path to the `obsidian-markdown-to-pdf` directory (where `start.bat` is located) |
+| **Export folder** | Folder where exported PDFs are saved |
+
+#### Exporting a file
+
+1. Open a markdown file in Obsidian
+2. Press `Ctrl+P` to open the command palette
+3. Search for **"Export markdown to PDF"**
+4. The PDF is saved to the configured export folder
 
 ### Image resolution order
 
