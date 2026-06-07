@@ -3,6 +3,7 @@ import re
 import markdown
 
 from src.constants import CSS_TEMPLATE
+from src.toc_scope import TocScopeExtension
 
 WIDTH_ATTR_PATTERN = re.compile(r'(<img\b[^>]*)\bwidth="(\d+)"([^>]*/>)')
 
@@ -28,7 +29,10 @@ def markdown_to_html(md_content: str) -> str:
             "obsidian_media",
             "fenced_code",
             "pymdownx.magiclink",
+            "attr_list",
+            "toc",
             "nl2br",
+            TocScopeExtension(),
         ],
     )
     return str(md.convert(md_content))

@@ -4,7 +4,7 @@ from src.html_converter import convert, markdown_to_html, wrap_html
 class TestMarkdownToHtml:
     def test_converts_heading(self) -> None:
         result = markdown_to_html("## Hello")
-        assert "<h2>" in result
+        assert "<h2" in result
         assert "Hello" in result
 
     def test_converts_table(self) -> None:
@@ -32,5 +32,37 @@ class TestConvert:
         md = "## Title\n\nSome paragraph."
         result = convert(md)
         assert "<!DOCTYPE html>" in result
-        assert "<h2>" in result
+        assert "<h2" in result
         assert "Some paragraph" in result
+
+    def test_toc_generates_clickable_links(self) -> None:
+        result = convert("[TOC]\n\n# Alpha\n\n## Beta One")
+        assert 'class="toc"' in result
+        assert '<a href="#alpha">Alpha</a>' in result
+        assert '<a href="#beta-one">Beta One</a>' in result
+        assert '<h1 id="alpha">' in result
+        assert '<h2 id="beta-one">' in result
+
+
+class TestTocScope:
+    def test_excludes_headings_before_marker(self) -> None:
+        result = convert("# Cheat Sheet\n\n[TOC]\n\n# Setup\n\n## Wifi")
+        # Heading above the marker still renders but is not in the ToC.
+        assert "<h1>Cheat Sheet</h1>" in result
+        assert '<a href="#cheat-sheet">' not in result
+        # Headings below the marker are listed.
+        assert '<a href="#setup">Setup</a>' in result
+        assert '<a href="#wifi">Wifi</a>' in result
+
+    def test_per_heading_omit(self) -> None:
+        result = convert("[TOC]\n\n# Setup\n\n## Secret { .toc-omit }\n\n## Theme")
+        # Omitted heading renders but is excluded from the ToC.
+        assert "Secret</h2>" in result
+        assert '<a href="#secret">' not in result
+        assert '<a href="#theme">Theme</a>' in result
+
+    def test_no_marker_lists_all_headings(self) -> None:
+        # Without a marker, no positional hiding: headings still get ids.
+        result = convert("# Alpha\n\n## Beta")
+        assert '<h1 id="alpha">' in result
+        assert '<h2 id="beta">' in result

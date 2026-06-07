@@ -7,6 +7,9 @@ RESOURCES_DIR = "_resources"
 
 PAGE_BREAK_HTML = '<div class="page-break"></div>'
 
+TOC_MARKER = "[TOC]"
+TOC_OMIT_CLASS = "toc-omit"
+
 ERR_INPUT_NOT_FOUND = "Input file not found: {path}"
 ERR_CONVERSION_FAILED = "Conversion failed: {error}"
 
@@ -98,5 +101,23 @@ pre code {
     padding: 0;
     font-size: 0.85em;
     line-height: 1.4;
+}
+
+.toc {
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 0.5em 1em;
+    margin: 1em 0;
+}
+
+.toc ul {
+    margin: 0.2em 0;
+    padding-left: 1.2em;
+}
+
+.toc a {
+    color: #1a1a1a;
+    text-decoration: none;
 }
 """
