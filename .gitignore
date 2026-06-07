@@ -211,3 +211,7 @@ claude-plans/
 .pytest_cache
 .ruff_cache
 tools/obsidian-markdown-to-pdf-helper/node_modules
+
+# cli-code-analyzer machine-specific config
+tools/analyze_code_config.bat
+code_analysis_results/
