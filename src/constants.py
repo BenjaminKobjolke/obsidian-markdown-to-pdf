@@ -14,6 +14,13 @@ CSS_TEMPLATE = """
 @page {
     size: A4;
     margin: 2cm;
+
+    @bottom-right {
+        content: counter(page) "/" counter(pages);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-size: 9pt;
+        color: #888;
+    }
 }
 
 body {
