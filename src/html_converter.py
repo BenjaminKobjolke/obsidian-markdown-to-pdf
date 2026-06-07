@@ -27,6 +27,7 @@ def markdown_to_html(md_content: str) -> str:
             "sane_lists",
             "obsidian_media",
             "fenced_code",
+            "pymdownx.magiclink",
             "nl2br",
         ],
     )

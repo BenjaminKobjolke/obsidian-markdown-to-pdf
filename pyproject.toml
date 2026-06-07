@@ -9,6 +9,7 @@ description = "Convert Obsidian-flavored markdown files to PDF"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "markdown>=3.5",
+    "pymdown-extensions>=10.0",
     "obsidian-media>=1.0.0",
     "weasyprint>=62.0",
     "python-frontmatter>=1.1.0",
