@@ -73,4 +73,30 @@ tr:nth-child(even) {
 p {
     margin: 0.6em 0;
 }
+
+code {
+    font-family: "Cascadia Code", "Consolas", "SFMono-Regular", "Menlo", monospace;
+    font-size: 0.88em;
+    background-color: #f0f0f0;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+}
+
+pre {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.8em 1em;
+    margin: 1em 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
 """

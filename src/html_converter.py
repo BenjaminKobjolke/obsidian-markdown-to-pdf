@@ -26,6 +26,7 @@ def markdown_to_html(md_content: str) -> str:
             "tables",
             "sane_lists",
             "obsidian_media",
+            "fenced_code",
         ],
     )
     return str(md.convert(md_content))
