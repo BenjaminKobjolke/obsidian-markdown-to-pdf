@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from src.html_converter import convert, markdown_to_html, wrap_html
+from src.obsidian_parser import parse
 
 
 class TestMarkdownToHtml:
@@ -66,3 +69,16 @@ class TestTocScope:
         result = convert("# Alpha\n\n## Beta")
         assert '<h1 id="alpha">' in result
         assert '<h2 id="beta">' in result
+
+
+class TestNoExportIntegration:
+    def test_stripped_section_absent_from_pdf_and_toc(self, tmp_path: Path) -> None:
+        md = (
+            "[TOC]\n\n# Visible\n\nKeep this.\n\n"
+            "[NO-EXPORT]\n# Hidden\n\nDrop this.\n[/NO-EXPORT]\n\n## Also Visible"
+        )
+        result = convert(parse(md, tmp_path))
+        assert "Hidden" not in result
+        assert "Drop this" not in result
+        assert '<a href="#visible">Visible</a>' in result
+        assert '<a href="#also-visible">Also Visible</a>' in result

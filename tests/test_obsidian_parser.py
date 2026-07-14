@@ -1,6 +1,8 @@
 from pathlib import Path
 
-from src.constants import PAGE_BREAK_HTML
+import pytest
+
+from src.constants import APP_NAME, NO_EXPORT_END, NO_EXPORT_START, PAGE_BREAK_HTML
 from src.obsidian_parser import (
     convert_page_breaks,
     convert_wiki_images,
@@ -8,6 +10,7 @@ from src.obsidian_parser import (
     make_image_paths_absolute,
     resolve_image_path,
     strip_frontmatter,
+    strip_no_export_sections,
 )
 
 
@@ -154,3 +157,43 @@ class TestConvertPageBreaks:
         content = "Page 1\n---\nPage 2\n---\nPage 3"
         result = convert_page_breaks(content)
         assert result.count(PAGE_BREAK_HTML) == 2
+
+
+class TestStripNoExportSections:
+    def test_removes_section_between_tags(self) -> None:
+        content = f"Before\n{NO_EXPORT_START}\nSecret text\n{NO_EXPORT_END}\nAfter"
+        result = strip_no_export_sections(content)
+        assert "Secret text" not in result
+        assert "Before" in result
+        assert "After" in result
+
+    def test_removes_multiple_blocks_keeps_between(self) -> None:
+        content = (
+            f"{NO_EXPORT_START}\nHidden 1\n{NO_EXPORT_END}\n"
+            f"Visible middle\n"
+            f"{NO_EXPORT_START}\nHidden 2\n{NO_EXPORT_END}\nEnd"
+        )
+        result = strip_no_export_sections(content)
+        assert "Hidden 1" not in result
+        assert "Hidden 2" not in result
+        assert "Visible middle" in result
+        assert "End" in result
+
+    def test_unmatched_start_keeps_content_and_warns(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        content = f"Before\n{NO_EXPORT_START}\nStill here\nAfter"
+        with caplog.at_level("WARNING", logger=APP_NAME):
+            result = strip_no_export_sections(content)
+        assert "Still here" in result
+        assert NO_EXPORT_START not in result
+        assert "Unmatched" in caplog.text
+
+    def test_no_tags_content_unchanged(self) -> None:
+        content = "Just regular content\nwith lines"
+        assert strip_no_export_sections(content) == content
+
+    def test_inline_tag_not_matched(self) -> None:
+        content = f"Text mentioning {NO_EXPORT_START} inline stays"
+        result = strip_no_export_sections(content)
+        assert "inline stays" in result

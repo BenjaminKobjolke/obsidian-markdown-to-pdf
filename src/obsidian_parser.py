@@ -3,11 +3,22 @@ from pathlib import Path
 
 import frontmatter
 
-from src.constants import PAGE_BREAK_HTML, RESOURCES_DIR
+from src.app_logger import AppLogger
+from src.constants import NO_EXPORT_END, NO_EXPORT_START, PAGE_BREAK_HTML, RESOURCES_DIR
 
 WIKI_IMAGE_PATTERN = re.compile(r"!\[\[([^\]|]+?)(?:\|(\d+))?\]\]")
 PAGE_BREAK_PATTERN = re.compile(r"^\s*---\s*$", re.MULTILINE)
 STANDARD_IMAGE_PATTERN = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
+NO_EXPORT_PATTERN = re.compile(
+    rf"^[ \t]*{re.escape(NO_EXPORT_START)}[ \t]*\r?\n"
+    rf".*?"
+    rf"^[ \t]*{re.escape(NO_EXPORT_END)}[ \t]*(?:\r?\n|$)",
+    re.DOTALL | re.MULTILINE,
+)
+_NO_EXPORT_TAG_LINE = re.compile(
+    rf"^[ \t]*(?:{re.escape(NO_EXPORT_START)}|{re.escape(NO_EXPORT_END)})[ \t]*(?:\r?\n|$)",
+    re.MULTILINE,
+)
 
 
 def strip_frontmatter(content: str) -> str:
@@ -79,9 +90,20 @@ def convert_page_breaks(content: str) -> str:
     return PAGE_BREAK_PATTERN.sub(PAGE_BREAK_HTML, content)
 
 
+def strip_no_export_sections(content: str) -> str:
+    result = NO_EXPORT_PATTERN.sub("", content)
+    if NO_EXPORT_START in result or NO_EXPORT_END in result:
+        AppLogger.warning(
+            "Unmatched %s/%s tag — section kept in export", NO_EXPORT_START, NO_EXPORT_END
+        )
+        result = _NO_EXPORT_TAG_LINE.sub("", result)
+    return result
+
+
 def parse(content: str, md_dir: Path) -> str:
     vault_root = find_vault_root(md_dir)
     result = strip_frontmatter(content)
+    result = strip_no_export_sections(result)
     result = convert_wiki_images(result, md_dir, vault_root)
     result = make_image_paths_absolute(result, md_dir)
     result = convert_page_breaks(result)

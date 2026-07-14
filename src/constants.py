@@ -10,6 +10,9 @@ PAGE_BREAK_HTML = '<div class="page-break"></div>'
 TOC_MARKER = "[TOC]"
 TOC_OMIT_CLASS = "toc-omit"
 
+NO_EXPORT_START = "[NO-EXPORT]"
+NO_EXPORT_END = "[/NO-EXPORT]"
+
 ERR_INPUT_NOT_FOUND = "Input file not found: {path}"
 ERR_CONVERSION_FAILED = "Conversion failed: {error}"
 
