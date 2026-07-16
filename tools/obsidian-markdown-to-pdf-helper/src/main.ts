@@ -44,9 +44,8 @@ export default class MarkdownToPdfPlugin extends Plugin {
 		const adapter = this.app.vault.adapter as FileSystemAdapter;
 		const basePath = adapter.getBasePath();
 		const absolutePath = `${basePath}\\${vaultRelativePath}`;
-		const outputPath = `${this.settings.exportFolder}\\${basename}.pdf`;
-		const startBat = `${this.settings.pythonToolPath}\\start.bat`;
-		const cmd = `"${startBat}" --input "${absolutePath}" --output "${outputPath}"`;
+		// Fallback only: a note's [output="..."] tag overrides the export folder.
+		const cmd = `"${this.settings.pythonToolPath}\\start.bat" --input "${absolutePath}" --default-output "${this.settings.exportFolder}"`;
 
 		console.log('[markdown-to-pdf] Running:', cmd);
 		new Notice('Exporting to PDF...');
@@ -58,8 +57,8 @@ export default class MarkdownToPdfPlugin extends Plugin {
 				console.error('[markdown-to-pdf] stdout:', stdout);
 				new Notice(`PDF export failed:\n${msg}`, 30000);
 			} else {
-				console.log('[markdown-to-pdf] Success:', outputPath);
-				new Notice(`PDF exported: ${outputPath}`);
+				console.log('[markdown-to-pdf] Success:', stdout);
+				new Notice(`PDF exported: ${basename}.pdf`);
 			}
 		});
 	}

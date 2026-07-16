@@ -7,6 +7,8 @@ Convert Obsidian-flavored markdown files to PDF with support for wiki-link image
 - Converts `![[image.png|width]]` wiki-link embeds to sized images
 - Strips YAML frontmatter from output
 - Treats `---` as page breaks
+- Inserts export date/time via `[date]` / `[time]` tags with optional `format` (see `docs/tags/DATE_TIME.md`)
+- Overrides the output path per note via `[output="./pdfs"]` tag, absolute or vault-relative (see `docs/tags/OUTPUT.md`)
 - Supports GFM tables
 - Resolves images from `_resources/` subdirectory, same directory, and vault-level `_resources/`
 - Automatically detects the Obsidian vault root via `.obsidian/` directory
@@ -49,6 +51,9 @@ start.bat --input "path/to/note.md" --output "output.pdf"
 | No `--output` | PDF saved next to the markdown file with `.pdf` extension |
 | `--output filename.pdf` | PDF saved in the same directory as the markdown file |
 | `--output path/to/file.pdf` | PDF saved at the specified path |
+| `--default-output path` | Fallback directory or `.pdf` path, used only when the note has no `[output]` tag |
+
+A note can also set its own output path with an `[output="./pdfs"]` tag — see `docs/tags/OUTPUT.md`. Precedence: `--output` > `[output]` tag > `--default-output` > next to the markdown file.
 
 ### Obsidian plugin
 
@@ -70,7 +75,7 @@ An Obsidian plugin is included at `tools/obsidian-markdown-to-pdf-helper/` for e
 | Setting | Description |
 |---|---|
 | **Python tool path** | Path to the `obsidian-markdown-to-pdf` directory (where `start.bat` is located) |
-| **Export folder** | Folder where exported PDFs are saved |
+| **Export folder** | Default folder where exported PDFs are saved; a note's `[output="..."]` tag overrides it |
 
 #### Exporting a file
 

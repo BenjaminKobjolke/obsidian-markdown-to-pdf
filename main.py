@@ -6,7 +6,7 @@ from src.app_logger import AppLogger
 from src.cli import parse_args, resolve_output_path
 from src.constants import ERR_CONVERSION_FAILED, ERR_INPUT_NOT_FOUND
 from src.html_converter import convert
-from src.obsidian_parser import parse
+from src.obsidian_parser import find_vault_root, parse
 from src.pdf_renderer import render
 
 
@@ -18,14 +18,15 @@ def main() -> int:
         AppLogger.error(ERR_INPUT_NOT_FOUND.format(path=input_path))
         return 1
 
-    output_path = resolve_output_path(input_path, args.output)
-
     try:
         md_content = input_path.read_text(encoding="utf-8")
         md_dir = input_path.parent.resolve()
 
         parsed = parse(md_content, md_dir)
-        html = convert(parsed)
+        vault_root = find_vault_root(md_dir)
+        output_path = resolve_output_path(input_path, args.output, parsed.output_tag, vault_root, args.default_output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        html = convert(parsed.content)
         render(html, output_path, base_url=str(md_dir))
 
         AppLogger.info("Converted %s -> %s", input_path.name, output_path)

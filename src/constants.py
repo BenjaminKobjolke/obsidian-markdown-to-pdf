@@ -13,6 +13,12 @@ TOC_OMIT_CLASS = "toc-omit"
 NO_EXPORT_START = "[NO-EXPORT]"
 NO_EXPORT_END = "[/NO-EXPORT]"
 
+DATE_TAG = "date"
+TIME_TAG = "time"
+OUTPUT_TAG = "output"
+DEFAULT_DATE_FORMAT = "DD.MM.YYYY"
+DEFAULT_TIME_FORMAT = "HH:mm"
+
 ERR_INPUT_NOT_FOUND = "Input file not found: {path}"
 ERR_CONVERSION_FAILED = "Conversion failed: {error}"
 

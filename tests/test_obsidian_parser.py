@@ -1,13 +1,16 @@
+from datetime import datetime
 from pathlib import Path
 
 import pytest
-
 from src.constants import APP_NAME, NO_EXPORT_END, NO_EXPORT_START, PAGE_BREAK_HTML
 from src.obsidian_parser import (
+    convert_datetime_tags,
     convert_page_breaks,
     convert_wiki_images,
+    extract_output_tag,
     find_vault_root,
     make_image_paths_absolute,
+    parse,
     resolve_image_path,
     strip_frontmatter,
     strip_no_export_sections,
@@ -179,9 +182,7 @@ class TestStripNoExportSections:
         assert "Visible middle" in result
         assert "End" in result
 
-    def test_unmatched_start_keeps_content_and_warns(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_unmatched_start_keeps_content_and_warns(self, caplog: pytest.LogCaptureFixture) -> None:
         content = f"Before\n{NO_EXPORT_START}\nStill here\nAfter"
         with caplog.at_level("WARNING", logger=APP_NAME):
             result = strip_no_export_sections(content)
@@ -197,3 +198,98 @@ class TestStripNoExportSections:
         content = f"Text mentioning {NO_EXPORT_START} inline stays"
         result = strip_no_export_sections(content)
         assert "inline stays" in result
+
+
+class TestConvertDatetimeTags:
+    NOW = datetime(2025, 7, 16, 8, 31, 5)
+
+    def test_date_default_format(self) -> None:
+        assert convert_datetime_tags("[date]", now=self.NOW) == "16.07.2025"
+
+    def test_time_default_format(self) -> None:
+        assert convert_datetime_tags("[time]", now=self.NOW) == "08:31"
+
+    def test_date_custom_format(self) -> None:
+        assert convert_datetime_tags('[date format="YYMMDD"]', now=self.NOW) == "250716"
+
+    def test_time_custom_format_with_seconds(self) -> None:
+        assert convert_datetime_tags('[time format="HH:mm:ss"]', now=self.NOW) == "08:31:05"
+
+    def test_literal_chars_pass_through(self) -> None:
+        assert convert_datetime_tags('[date format="YYYY-MM-DD"]', now=self.NOW) == "2025-07-16"
+
+    def test_inline_usage_replaces_both(self) -> None:
+        result = convert_datetime_tags("Created: [date] at [time]", now=self.NOW)
+        assert result == "Created: 16.07.2025 at 08:31"
+
+    def test_no_tags_content_unchanged(self) -> None:
+        content = "Just regular content\nwith [brackets] but no tags"
+        assert convert_datetime_tags(content, now=self.NOW) == content
+
+    def test_wrong_case_untouched(self) -> None:
+        content = "[DATE] and [Time]"
+        assert convert_datetime_tags(content, now=self.NOW) == content
+
+
+class TestExtractOutputTag:
+    def test_extracts_value_and_strips_tag(self) -> None:
+        result = extract_output_tag('Text\n[output="./pdfs"]\nMore')
+        assert result.output_tag == "./pdfs"
+        assert "[output" not in result.content
+        assert "Text" in result.content
+        assert "More" in result.content
+
+    def test_no_tag_returns_none_content_unchanged(self) -> None:
+        content = "Just regular content\nwith [brackets]"
+        result = extract_output_tag(content)
+        assert result.output_tag is None
+        assert result.content == content
+
+    def test_multiple_tags_first_wins_and_warns(self, caplog: pytest.LogCaptureFixture) -> None:
+        with caplog.at_level("WARNING", logger=APP_NAME):
+            result = extract_output_tag('[output="./a"]\ntext\n[output="./b"]')
+        assert result.output_tag == "./a"
+        assert "[output" not in result.content
+        assert "Multiple" in caplog.text
+
+    def test_empty_value_warns_and_returns_none(self, caplog: pytest.LogCaptureFixture) -> None:
+        with caplog.at_level("WARNING", logger=APP_NAME):
+            result = extract_output_tag('[output=""]')
+        assert result.output_tag is None
+        assert "[output" not in result.content
+        assert "empty" in caplog.text
+
+    def test_whitespace_value_treated_as_empty(self, caplog: pytest.LogCaptureFixture) -> None:
+        with caplog.at_level("WARNING", logger=APP_NAME):
+            result = extract_output_tag('[output="   "]')
+        assert result.output_tag is None
+
+    def test_wrong_case_stays_literal(self) -> None:
+        content = '[OUTPUT="./pdfs"]'
+        result = extract_output_tag(content)
+        assert result.output_tag is None
+        assert result.content == content
+
+
+class TestParseOutputTag:
+    def test_parse_returns_result_with_output_tag(self, tmp_path: Path) -> None:
+        result = parse('Hello\n[output="./pdfs"]', tmp_path)
+        assert result.output_tag == "./pdfs"
+        assert "[output" not in result.content
+        assert "Hello" in result.content
+
+    def test_parse_without_tag_returns_none(self, tmp_path: Path) -> None:
+        result = parse("Hello world", tmp_path)
+        assert result.output_tag is None
+        assert "Hello world" in result.content
+
+    def test_tag_inside_no_export_ignored(self, tmp_path: Path) -> None:
+        content = f'Before\n{NO_EXPORT_START}\n[output="./hidden"]\n{NO_EXPORT_END}\nAfter'
+        result = parse(content, tmp_path)
+        assert result.output_tag is None
+
+    def test_tag_in_frontmatter_ignored(self, tmp_path: Path) -> None:
+        content = "---\nnote: '[output=\"./fm\"]'\n---\nBody"
+        result = parse(content, tmp_path)
+        assert result.output_tag is None
+        assert "Body" in result.content

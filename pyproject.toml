@@ -43,6 +43,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["integration: end-to-end tests"]
 
 [dependency-groups]
 dev = [

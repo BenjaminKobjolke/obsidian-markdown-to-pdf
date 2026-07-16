@@ -73,11 +73,8 @@ class TestTocScope:
 
 class TestNoExportIntegration:
     def test_stripped_section_absent_from_pdf_and_toc(self, tmp_path: Path) -> None:
-        md = (
-            "[TOC]\n\n# Visible\n\nKeep this.\n\n"
-            "[NO-EXPORT]\n# Hidden\n\nDrop this.\n[/NO-EXPORT]\n\n## Also Visible"
-        )
-        result = convert(parse(md, tmp_path))
+        md = "[TOC]\n\n# Visible\n\nKeep this.\n\n[NO-EXPORT]\n# Hidden\n\nDrop this.\n[/NO-EXPORT]\n\n## Also Visible"
+        result = convert(parse(md, tmp_path).content)
         assert "Hidden" not in result
         assert "Drop this" not in result
         assert '<a href="#visible">Visible</a>' in result
