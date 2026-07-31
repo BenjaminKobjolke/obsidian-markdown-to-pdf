@@ -215,3 +215,6 @@ tools/obsidian-markdown-to-pdf-helper/node_modules
 # cli-code-analyzer machine-specific config
 tools/analyze_code_config.bat
 code_analysis_results/
+
+# Temporary Git commit message
+tmp/commit_msg.tmp
