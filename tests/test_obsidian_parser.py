@@ -138,6 +138,12 @@ class TestMakeImagePathsAbsolute:
         result = make_image_paths_absolute(content, md_dir)
         assert "file:///E:/vault/_resources/image.png" in result
 
+    def test_preserves_data_uris(self) -> None:
+        md_dir = Path("/docs")
+        content = "![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4s=)"
+        result = make_image_paths_absolute(content, md_dir)
+        assert result == content
+
 
 class TestConvertPageBreaks:
     def test_converts_triple_dash_to_page_break(self) -> None:

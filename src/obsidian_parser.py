@@ -109,7 +109,7 @@ def make_image_paths_absolute(content: str, md_dir: Path) -> str:
     def _replace(match: re.Match[str]) -> str:
         alt = match.group(1)
         path = match.group(2)
-        if path.startswith(("http://", "https://", "/", "file:///")):
+        if path.startswith(("http://", "https://", "/", "file:///", "data:")):
             return match.group(0)
         absolute = md_dir / path
         return f"![{alt}]({_path_to_uri(absolute)})"
